@@ -6,7 +6,7 @@ using System.Linq;
 
 namespace MajiroStringEditor
 {
-    public class Obj1
+    public class Parser
     {
         public Encoding Encoding = Encoding.GetEncoding(932);
         static KEY XOR = new KEY();
@@ -28,7 +28,7 @@ namespace MajiroStringEditor
         List<ushort> LinesIds;
 
         const uint ByteCodeBegin = 0x28;
-        public Obj1(byte[] Script) {
+        public Parser(byte[] Script) {
             this.Script = Script;
             string Header = ReadStrAt(0);
             if (Header == EncHeader)
@@ -87,13 +87,9 @@ namespace MajiroStringEditor
 
                         string Str = ReadStrAt(i + 2);
 
-                        //if (Str.Contains("With that, Maya"))
-                        //    System.Diagnostics.Debugger.Break();
-
                         if (Str.StartsWith("「")) {
                             IsName[Ind] = true;
                             EndMap[Ind++] = i - 2;
-
                             BegMap[Ind] = i - 2;
                         }
 
@@ -102,7 +98,7 @@ namespace MajiroStringEditor
                         if (!Str.EndsWith("」"))
                             Str = Str.TrimStart('「');
 
-                        if (Ind >= Strings.Count)
+                        while (Ind >= Strings.Count)
                             Strings.Add(string.Empty);
 
                         Strings[Ind] += Str;
@@ -183,7 +179,7 @@ namespace MajiroStringEditor
             this.Strings = new string[Strings.Count];
             Strings.CopyTo(this.Strings, 0);
 
-            return Strings.ToArray();//Prevent edit the private array.
+            return Strings.ToArray();
         }
 
         private bool EqualsAt(uint Index, byte[] Content) {
@@ -198,7 +194,6 @@ namespace MajiroStringEditor
             return true;
         }
 
-        public byte[] Export(string[] Strings) => Export(Strings, false);
         public byte[] Export(string[] Strings, bool Encrypt) {
             byte[] Script = new byte[this.Script.Length];
             this.Script.CopyTo(Script, 0);
